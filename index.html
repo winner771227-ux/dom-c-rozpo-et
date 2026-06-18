@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Měsíční přehled příjmů a výdajů</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f6f4ef;
+    --paper: #ffffff;
+    --ink: #1f2a24;
+    --ink-soft: #5b6660;
+    --line: #dcd6c8;
+    --accent: #2f6e4f;
+    --accent-soft: #e4efe7;
+    --warn: #a8432f;
+    --warn-soft: #f6e6e1;
+    --gold: #b08a2e;
+    --gold-soft: #f3ecd9;
+    --mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:14px;
+    line-height:1.5;
+    padding:24px 16px 80px;
+  }
+
+  .wrap{max-width:980px;margin:0 auto;}
+
+  header.top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:12px;
+    border-bottom:3px solid var(--ink);
+    padding-bottom:14px;
+    margin-bottom:24px;
+  }
+  header.top h1{
+    font-family:var(--serif);
+    font-size:28px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  header.top .period{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--ink-soft);
+    text-align:right;
+  }
+  header.top .period strong{
+    display:block;
+    font-size:18px;
+    color:var(--ink);
+    font-family:var(--sans);
+    font-weight:700;
+  }
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:28px;
+  }
+  button{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:600;
+    border:1.5px solid var(--ink);
+    background:var(--paper);
+    color:var(--ink);
+    padding:9px 16px;
+    border-radius:7px;
+    cursor:pointer;
+    transition:background .12s, color .12s, transform .05s;
+  }
+  button:hover{background:var(--ink);color:var(--paper);}
+  button:active{transform:scale(0.98);}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  button.primary:hover{background:#244f39;border-color:#244f39;}
+  button.ghost{border-color:var(--line);color:var(--ink-soft);}
+  button.ghost:hover{background:var(--ink-soft);border-color:var(--ink-soft);}
+  button.small{padding:5px 10px;font-size:12px;border-radius:5px;}
+  input[type=file]{display:none;}
+
+  section.card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px 24px;
+    margin-bottom:22px;
+    box-shadow:0 1px 2px rgba(0,0,0,0.02);
+  }
+  section.card > h2{
+    font-family:var(--serif);
+    font-size:19px;
+    font-weight:600;
+    margin:0 0 4px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  section.card > h2 .tag{
+    font-family:var(--mono);
+    font-size:11px;
+    font-weight:500;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    background:var(--bg);
+    border:1px solid var(--line);
+    padding:2px 7px;
+    border-radius:4px;
+  }
+  section.card > p.sub{
+    margin:0 0 18px;
+    color:var(--ink-soft);
+    font-size:13px;
+  }
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  @media (max-width:720px){.grid2{grid-template-columns:1fr;}}
+
+  .field-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:7px 0;
+    border-bottom:1px solid #efece3;
+    gap:12px;
+  }
+  .field-row:last-child{border-bottom:none;}
+  .field-row .lbl{color:var(--ink-soft);font-size:13.5px;}
+  .field-row .lbl.strong{color:var(--ink);font-weight:600;}
+  .field-row .val{
+    font-family:var(--mono);
+    font-weight:600;
+    text-align:right;
+    min-width:90px;
+  }
+  .field-row.total{
+    border-top:2px solid var(--ink);
+    margin-top:4px;
+    padding-top:10px;
+    font-weight:700;
+  }
+  .field-row.total .val{font-size:15px;}
+  .field-row.neg .val{color:var(--warn);}
+  .field-row.pos .val{color:var(--accent);}
+
+  input.editable{
+    font-family:var(--mono);
+    font-weight:600;
+    text-align:right;
+    border:1.5px solid var(--accent);
+    background:var(--accent-soft);
+    border-radius:5px;
+    padding:4px 8px;
+    width:110px;
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  input.editable:focus{outline:none;border-color:var(--ink);background:#fff;}
+
+  .hero-input{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--gold-soft);
+    border:1.5px solid var(--gold);
+    border-radius:8px;
+    padding:14px 18px;
+    margin-bottom:18px;
+  }
+  .hero-input label{font-weight:700;font-size:14.5px;}
+  .hero-input .hint{display:block;font-size:11.5px;font-weight:400;color:var(--ink-soft);margin-top:2px;}
+  .hero-input input{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:17px;
+    text-align:right;
+    border:1.5px solid var(--gold);
+    background:#fff;
+    border-radius:6px;
+    padding:7px 10px;
+    width:150px;
+  }
+  .hero-input input:focus{outline:none;border-color:var(--ink);}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{
+    text-align:left;
+    font-family:var(--mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:var(--ink-soft);
+    border-bottom:2px solid var(--ink);
+    padding:6px 8px;
+    white-space:nowrap;
+  }
+  td{padding:5px 8px;border-bottom:1px solid #efece3;vertical-align:middle;}
+  tr:hover td{background:#fbfaf6;}
+  td.num{font-family:var(--mono);text-align:right;white-space:nowrap;}
+  td.center{text-align:center;}
+  tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:none;font-family:var(--mono);}
+
+  table.fixed-costs input.editable{width:90px;}
+  table.daily input.editable{width:80px;padding:3px 6px;font-size:12.5px;}
+
+  .weekend{color:var(--warn);}
+  .today-row td{background:var(--accent-soft) !important;}
+
+  .toggle{
+    appearance:none;
+    width:34px;height:19px;
+    background:#d8d4c6;
+    border-radius:10px;
+    position:relative;
+    cursor:pointer;
+    outline:none;
+    border:none;
+    flex:none;
+    transition:background .15s;
+  }
+  .toggle:checked{background:var(--accent);}
+  .toggle::before{
+    content:"";
+    position:absolute;
+    top:2px;left:2px;
+    width:15px;height:15px;
+    background:#fff;
+    border-radius:50%;
+    transition:left .15s;
+    box-shadow:0 1px 2px rgba(0,0,0,.25);
+  }
+  .toggle:checked::before{left:17px;}
+
+  .scrollx{overflow-x:auto;}
+
+  @media (max-width:600px){
+    body{padding:16px 10px 70px;font-size:13px;}
+    header.top h1{font-size:22px;}
+    section.card{padding:16px 14px;}
+    .hero-input{flex-direction:column;align-items:flex-start;gap:10px;}
+    .hero-input input{width:100%;}
+    table.daily{min-width:480px;}
+    table.fixed-costs{min-width:280px;}
+    .summary-blocks{grid-template-columns:1fr 1fr;}
+  }
+
+  .summary-blocks{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:4px;}
+  @media (max-width:760px){.summary-blocks{grid-template-columns:repeat(2,1fr);}}
+  .sblock{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px 14px;
+    background:var(--bg);
+  }
+  .sblock .k{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);}
+  .sblock .v{font-family:var(--mono);font-weight:700;font-size:18px;margin-top:3px;}
+  .sblock.income{border-color:var(--accent);background:var(--accent-soft);}
+  .sblock.expense{border-color:var(--warn);background:var(--warn-soft);}
+  .sblock.savings{border-color:var(--gold);background:var(--gold-soft);}
+
+  .footer-note{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:12px;
+    margin-top:30px;
+    line-height:1.7;
+  }
+  .footer-note code{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 5px;
+    font-family:var(--mono);
+  }
+
+  .modal-backdrop{
+    position:fixed;inset:0;
+    background:rgba(20,20,15,.55);
+    display:none;
+    align-items:center;justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .modal-backdrop.show{display:flex;}
+  .modal{
+    background:var(--paper);
+    border-radius:12px;
+    max-width:480px;
+    width:100%;
+    padding:26px 26px 22px;
+    box-shadow:0 12px 40px rgba(0,0,0,.25);
+  }
+  .modal h3{font-family:var(--serif);margin:0 0 10px;font-size:20px;}
+  .modal p{font-size:13.5px;color:var(--ink-soft);margin:0 0 16px;line-height:1.6;}
+  .modal .row-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
+  .modal label.field-label{font-size:12px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
+  .modal select, .modal input[type=text]{
+    width:100%;
+    font-family:var(--sans);
+    font-size:14px;
+    padding:8px 10px;
+    border:1.5px solid var(--line);
+    border-radius:6px;
+    margin-top:6px;
+    margin-bottom:14px;
+  }
+
+  .toast{
+    position:fixed;
+    bottom:24px;left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--ink);
+    color:#fff;
+    padding:10px 18px;
+    border-radius:7px;
+    font-size:13px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s, transform .2s;
+    z-index:60;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Měsíční přehled příjmů a výdajů</h1>
+    <div class="period">
+      Aktuální měsíc
+      <strong id="periodLabel">Červen 2026</strong>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button class="primary" id="btnNewMonth">+ Nový měsíc</button>
+    <button class="ghost" id="btnImport">Načíst měsíc (JSON)</button>
+    <button class="ghost" id="btnExport">Stáhnout zálohu (JSON)</button>
+    <button class="ghost small" id="btnReset" style="margin-left:auto;">Obnovit šablonu</button>
+    <input type="file" id="fileInput" accept="application/json">
+  </div>
+
+  <!-- ===================== SOUHRN ===================== -->
+  <section class="card">
+    <h2>Souhrn měsíce <span class="tag">přehled</span></h2>
+    <p class="sub">Dopočítáno z listů Příjmy a Rozpočet — nic se zde nezadává.</p>
+    <div class="summary-blocks">
+      <div class="sblock income">
+        <div class="k">Celkový příjem</div>
+        <div class="v" id="sumIncome">–</div>
+      </div>
+      <div class="sblock expense">
+        <div class="k">Výdaje celkem</div>
+        <div class="v" id="sumExpense">–</div>
+      </div>
+      <div class="sblock savings">
+        <div class="k">Úspory celkem</div>
+        <div class="v" id="sumSavings">–</div>
+      </div>
+      <div class="sblock">
+        <div class="k">Zůstatek</div>
+        <div class="v" id="sumZustatek">–</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PŘÍJMY ===================== -->
+  <section class="card">
+    <h2>Příjmy <span class="tag">list: Příjmy</span></h2>
+    <p class="sub">Ručně se doplňuje jen pole <strong>C2</strong> (fakturovaná částka bez DPH). Vše ostatní se dopočítá.</p>
+
+    <div class="hero-input">
+      <label for="inpC2">Platba na VC (bez DPH)
+        <span class="hint">buňka C2 · vstup pro tento měsíc</span>
+      </label>
+      <input type="text" inputmode="decimal" id="inpC2" value="44320">
+    </div>
+
+    <div class="grid2">
+      <div>
+        <div class="field-row"><span class="lbl strong">Příjem (C3 = C2 − 150 − 2400 − 89)</span><span class="val" id="p_C3">–</span></div>
+        <div class="field-row"><span class="lbl">Toto fakturuju já! (C5)</span><span class="val" id="p_C5">–</span></div>
+        <div class="field-row neg"><span class="lbl">SOC + ZDRAV (C7)</span><span class="val" id="p_C7">–</span></div>
+        <div class="field-row total"><span class="lbl strong">Po odvodech (D7)</span><span class="val" id="p_D7">–</span></div>
+        <div class="field-row neg"><span class="lbl">Měsíční pevné platby (C9 = suma vpravo)</span><span class="val" id="p_C9">–</span></div>
+        <div class="field-row total"><span class="lbl strong">Zbývá po fixních platbách (D9)</span><span class="val" id="p_D9">–</span></div>
+        <div class="field-row"><span class="lbl">Rezerva (C17 = D15 − C19)</span><span class="val" id="p_C17">–</span></div>
+        <div class="field-row total pos"><span class="lbl strong">Na spotřebu (C19)</span><span class="val" id="p_C19">13 950 Kč</span></div>
+        <div class="field-row"><span class="lbl">≈ Kč / den</span><span class="val" id="p_perDay">450,-/den</span></div>
+        <div class="field-row total"><span class="lbl strong">Celkem spotřeba + fixní platby (D22)</span><span class="val" id="p_D22">–</span></div>
+      </div>
+
+      <div>
+        <div class="scrollx">
+        <table class="fixed-costs">
+          <thead><tr><th>Měsíční pevné platby</th><th style="text-align:right">Kč</th></tr></thead>
+          <tbody id="fixedCostsBody"></tbody>
+          <tfoot><tr><td>Celkem (M34)</td><td class="num" id="p_M34">–</td></tr></tfoot>
+        </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ROZPOČET ===================== -->
+  <section class="card">
+    <h2>Rozpočet <span class="tag">list: Rozpočet</span></h2>
+    <p class="sub">Souhrn fixních nákladů, ostatních výdajů, úspor a zůstatku — vychází z listu Příjmy a z pevných položek níže.</p>
+
+    <div class="grid2">
+      <div>
+        <div class="field-row"><span class="lbl strong">Příjem (F13)</span><span class="val" id="r_F13">–</span></div>
+        <div class="field-row"><span class="lbl">— Výplata (F4 = Příjmy!D7)</span><span class="val" id="r_F4">–</span></div>
+        <div class="field-row"><span class="lbl">— PC / PM / MP / z května</span><span class="val" id="r_extra">–</span></div>
+        <div class="field-row neg"><span class="lbl strong">Výdaje celkem (E17 = J23+M23)</span><span class="val" id="r_E17">–</span></div>
+        <div class="field-row"><span class="lbl">— Fixní náklady (J23)</span><span class="val" id="r_J23">–</span></div>
+        <div class="field-row"><span class="lbl">— Ostatní výdaje (M23)</span><span class="val" id="r_M23">–</span></div>
+        <div class="field-row"><span class="lbl">Úspory celkem (Q23)</span><span class="val" id="r_Q23">–</span></div>
+        <div class="field-row total"><span class="lbl strong">Zůstatek (B24)</span><span class="val" id="r_B24">–</span></div>
+        <div class="field-row"><span class="lbl">Podíl úspor z příjmu</span><span class="val" id="r_share">–</span></div>
+      </div>
+      <div>
+        <div class="scrollx">
+        <table>
+          <thead><tr><th>Plánované úspory</th><th style="text-align:right">Plán</th><th style="text-align:right">Skutečně</th></tr></thead>
+          <tbody id="savingsBody"></tbody>
+          <tfoot><tr><td>Celkem</td><td class="num" id="r_P23">–</td><td class="num" id="r_Q23b">–</td></tr></tfoot>
+        </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CASHFLOW ===================== -->
+  <section class="card">
+    <h2>Sledování cashflow <span class="tag">list: Sledování cashflow</span></h2>
+    <p class="sub">Denní deník útrat na běžnou spotřebu. Editujte sloupec „kolik“ — zůstatek a Kč/den se přepočítají živě.</p>
+
+    <div class="summary-blocks" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
+      <div class="sblock">
+        <div class="k">Počátek stavu</div>
+        <div class="v" id="cf_start">–</div>
+      </div>
+      <div class="sblock">
+        <div class="k">Konec stavu (po dnešku)</div>
+        <div class="v" id="cf_end">–</div>
+      </div>
+      <div class="sblock">
+        <div class="k">Zbývá Kč / den</div>
+        <div class="v" id="cf_perDay">–</div>
+      </div>
+    </div>
+
+    <div class="scrollx">
+    <table class="daily">
+      <thead>
+        <tr>
+          <th>Den</th><th>Datum</th><th style="text-align:right">Kolik (Kč)</th>
+          <th style="text-align:right">Stav (Kč)</th><th style="text-align:right">Kč / den</th>
+        </tr>
+      </thead>
+      <tbody id="dailyBody"></tbody>
+    </table>
+    </div>
+
+    <h3 style="font-family:var(--serif);font-size:16px;margin:26px 0 10px;">Pevné platby měsíce — odečet ze stavu</h3>
+    <p class="sub" style="margin-top:-4px;">Zaškrtnuté „strhnuto z účtu“ se neodečítají od hotovostní spotřeby (R = 0); nezaškrtnuté se odečtou (R = částka).</p>
+    <div class="scrollx">
+    <table>
+      <thead><tr><th>Položka</th><th style="text-align:right">Kč</th><th class="center">Strhnuto z účtu</th><th style="text-align:right">Odečteno (R)</th></tr></thead>
+      <tbody id="cfFixedBody"></tbody>
+      <tfoot><tr><td colspan="3">Celkem odečteno (R33)</td><td class="num" id="cf_R33">–</td></tr></tfoot>
+    </table>
+    </div>
+  </section>
+
+  <p class="footer-note">
+    Statický kalkulátor běžící čistě v prohlížeči (žádný server, žádné databáze).<br>
+    Data se neukládají automaticky — použijte <code>Stáhnout zálohu</code> před zavřením karty a <code>Načíst měsíc</code> pro obnovení.<br>
+    Hostováno na GitHub Pages.
+  </p>
+</div>
+
+<!-- New month modal -->
+<div class="modal-backdrop" id="modalNewMonth">
+  <div class="modal">
+    <h3>Nový měsíc</h3>
+    <p>Vytvoří se nová prázdná šablona pro vybraný měsíc/rok (pole C2 a denní útraty se vynulují, pevné platby zůstanou stejné jako teď). Aktuální rozpracovaný měsíc doporučujeme nejprve stáhnout jako zálohu.</p>
+    <label class="field-label">Rok</label>
+    <input type="text" id="nmYear" inputmode="numeric" value="2026">
+    <label class="field-label">Měsíc</label>
+    <select id="nmMonth"></select>
+    <div class="row-btns">
+      <button class="ghost" id="nmCancel">Zrušit</button>
+      <button class="primary" id="nmConfirm">Vytvořit a stáhnout JSON</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   DATA MODEL — replikuje listy Příjmy / Rozpočet / Sledování cashflow
+   ========================================================= */
+
+const MONTH_NAMES = ["Leden","Únor","Březen","Duben","Květen","Červen","Červenec","Srpen","Září","Říjen","Listopad","Prosinec"];
+
+const FIXED_COST_LABELS = [
+  "Apple","Výživné","Nájem","Inkaso","Portu","Životka","Koučink","Naty kapesné",
+  "Fitko","Naty Portu","Naty koně","internet Žitná","Netflix","Radka","Kranio",
+  "Spotify","BICOM já","BICOM Naty","Poplatky","Konstelace","Canva","ChatGPT","Jaroušek","Seminář"
+];
+
+const FIXED_COST_DEFAULTS = [50,1700,5000,227,5000,2764,800,500,890,300,600,280,448,1000,0,249,700,700,280,0,0,120,600,0];
+
+// Cashflow sheet pevné platby (O8:Q32) — název, částka (odkaz na Příjmy), strhnuto z účtu (Q)
+const CF_FIXED = [
+  {label:"Apple", idx:0, paid:true},
+  {label:"Výživné", idx:1, paid:true},
+  {label:"Nájem", idx:2, paid:true},
+  {label:"Inkaso", idx:3, paid:false},
+  {label:"Internet", idx:11, paid:true},
+  {label:"PORTU", idx:4, paid:false},
+  {label:"Životka", idx:5, paid:false},
+  {label:"Úspory ost", idx:-1, paid:true, special:"uspory_ost"},
+  {label:"Fitko", idx:8, paid:true},
+  {label:"Naty stavebko", idx:9, paid:false},
+  {label:"Naty koně", idx:10, paid:true},
+  {label:"Netflix", idx:12, paid:false},
+  {label:"Naty kapesné", idx:7, paid:true},
+  {label:"Spotify", idx:15, paid:false},
+  {label:"BICOM já", idx:16, paid:true},
+  {label:"BICOM Naty", idx:17, paid:true},
+  {label:"Poplatky", idx:18, paid:false},
+  {label:"Koučink", idx:6, paid:true},
+  {label:"Seminář_1", idx:23, paid:false},
+  {label:"konstelace", idx:19, paid:false},
+  {label:"Radka", idx:13, paid:true},
+  {label:"Kranio", idx:14, paid:false},
+  {label:"Jaroušek", idx:22, paid:false},
+  {label:"Canva", idx:20, paid:false},
+  {label:"ChatGPT", idx:21, paid:true},
+];
+
+const SAVINGS_PLAN = [
+  {label:"Portu", plan:3000, actual:5000},
+  {label:"Dovolená", plan:2000, actual:2000},
+  {label:"Golf", plan:1000, actual:0},
+  {label:"Vánoce", plan:1500, actual:500},
+  {label:"Oblečení/obuv", plan:1000, actual:500},
+  {label:"Rezerva", plan:10000, actual:1000},
+  {label:"Kros", plan:1500, actual:500},
+  {label:"oslava 50", plan:0, actual:1000},
+];
+
+const ROZPOCET_EXTRA_INCOME = {PC:500, PM:1500, MP:5000, "z května":3500};
+
+function defaultState(year, month){
+  return {
+    year, month,
+    c2: 44320,
+    fixedCosts: FIXED_COST_DEFAULTS.slice(),
+    cfPaidFlags: CF_FIXED.map(f => f.paid),
+    dailySpend: new Array(31).fill(null), // null = not yet entered; šablona má pevně 31 řádků
+    rozpocetExtra: {...ROZPOCET_EXTRA_INCOME},
+    savingsActual: SAVINGS_PLAN.map(s => s.actual),
+  };
+}
+
+let STATE = loadFromStorageOrDefault();
+
+function loadFromStorageOrDefault(){
+  try{
+    const raw = localStorage.getItem("rozpocet_state_v1");
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && typeof parsed.c2 === "number") return parsed;
+    }
+  }catch(e){}
+  return defaultState(2026, 6);
+}
+
+function saveToStorage(){
+  try{ localStorage.setItem("rozpocet_state_v1", JSON.stringify(STATE)); }catch(e){}
+}
+
+/* =========================================================
+   FORMÁTOVÁNÍ
+   ========================================================= */
+function fmt(n){
+  if(n === null || n === undefined || isNaN(n)) return "–";
+  return Math.round(n).toLocaleString("cs-CZ") + " Kč";
+}
+function fmtPlain(n){
+  if(n === null || n === undefined || isNaN(n)) return "–";
+  return Math.round(n*100)/100;
+}
+function fmtPct(n){
+  if(n === null || n === undefined || isNaN(n)) return "–";
+  return (Math.round(n*1000)/10) + " %";
+}
+
+/* =========================================================
+   VÝPOČTY — Příjmy
+   ========================================================= */
+function calcPrijmy(){
+  const C2 = STATE.c2;
+  const C3 = C2 - 150 - 2400 - 89;     // Příjem
+  const C5 = C3;                        // toto fakturuju já!
+  const D5 = C5;
+  const M3 = 250+5720+357;              // Socko
+  const M4 = 3306;                      // Zdravko
+  const M6 = M3 + M4;                   // SUM
+  const C7 = M6;                        // SOC + ZDRAV
+  const D7 = D5 - C7;                   // po odvodech
+  const M34 = STATE.fixedCosts.reduce((a,b)=>a+(Number(b)||0),0);
+  const C9 = M34;                       // měsíční pevné platby
+  const D9 = D7 - C9;
+  const D11 = D9; // spl.hypo C11 prázdné -> D9-0
+  const D13 = D11; // příjem hypo C13 prázdné
+  const C15 = 0;
+  const D15 = D13 - C15;
+  const C19 = 13950; // Na spotřebu — neměnná šablonová hodnota
+  const C17 = D15 - C19;
+  const D17 = D15 - (31 * 400);
+  const D22 = C19 + M34;
+  return {C2,C3,C5,D5,M3,M4,M6,C7,D7,M34,C9,D9,D11,D13,C15,D15,C19,C17,D17,D22};
+}
+
+/* =========================================================
+   VÝPOČTY — Rozpočet
+   ========================================================= */
+function calcRozpocet(prijmy){
+  const F4 = prijmy.D7;
+  const extra = STATE.rozpocetExtra;
+  const F13 = F4 + extra.PC + extra.PM + extra.MP + extra["z května"];
+
+  const idx = name => FIXED_COST_LABELS.indexOf(name);
+  const get = name => Number(STATE.fixedCosts[idx(name)]) || 0;
+
+  // Rozpočet!J4:J19 — "Fixní náklady" sloupec (přesná replika Excel vzorců)
+  const J23 = get("Nájem") + get("internet Žitná") + get("Inkaso") + get("Životka") +
+              get("Výživné") + get("Fitko") + get("Apple") + get("Naty kapesné") +
+              get("Naty Portu") + get("Naty koně") + get("Netflix") + get("Spotify") +
+              get("Poplatky") + prijmy.C19 /* jídlo/spotřeba */ + get("Canva") + get("ChatGPT");
+
+  // Rozpočet!M4:M11 — "Výdaje - ostatní" sloupec
+  const M23 = get("Koučink") + get("Konstelace") + get("Seminář") + get("Radka") +
+              get("Kranio") + get("BICOM já") + get("BICOM Naty") + get("Jaroušek");
+
+  const E17 = J23 + M23; // Výdaje celkem
+  const P23 = SAVINGS_PLAN.reduce((a,s)=>a+s.plan,0);
+  const Q23 = STATE.savingsActual.reduce((a,v)=>a+(Number(v)||0),0);
+  const B24 = F13 - E17 - Q23; // Zůstatek (B24 = Y9 = příjem - výdaje - úspory)
+  const share = F13 ? Q23/F13 : 0;
+  return {F4, extra, F13, J23, M23, E17, P23, Q23, B24, share};
+}
+
+/* =========================================================
+   VÝPOČTY — Sledování cashflow (denní)
+   ========================================================= */
+function calcCashflow(prijmy, rozpocet){
+  const DAYS = 31; // šablona má pevně 31 řádků (G8:G38), stejně jako originální Excel
+  const E7 = 31 * 450;                     // počáteční stav pro hotovostní spotřebu (E7 = 31*450, neměnné)
+  const F7 = E7 / DAYS;                    // Kč/den startovní
+  const P5 = rozpocet.J23 + rozpocet.M23 + rozpocet.Q23; // "Počátek stavu" nahoře = celkové výdaje+úspory měsíce
+
+  const idxByLabel = name => FIXED_COST_LABELS.indexOf(name);
+  let cfRows = CF_FIXED.map((row,i)=>{
+    let amount;
+    if(row.special === "uspory_ost"){
+      // Rozpočet!Q5+Q6+...+Q22 — vynechává první položku (Portu = Q4)
+      amount = STATE.savingsActual.slice(1).reduce((a,v)=>a+(Number(v)||0),0);
+    } else {
+      amount = Number(STATE.fixedCosts[row.idx]) || 0;
+    }
+    const paid = STATE.cfPaidFlags[i];
+    const R = paid ? 0 : amount;
+    return {label: row.label, amount, paid, R};
+  });
+  const R33 = cfRows.reduce((a,r)=>a+r.R,0);
+
+  // denní řádky
+  let rows = [];
+  let prevStand = E7;
+  let runningDsum = 0;
+  for(let d=1; d<=DAYS; d++){
+    const spend = STATE.dailySpend[d-1];
+    const spendNum = (spend === null || spend === undefined || spend === "") ? null : Number(spend);
+    const stand = spendNum === null ? prevStand : prevStand - spendNum;
+    const remainingDays = DAYS - d + 1;
+    const perDay = stand / remainingDays;
+    const date = new Date(STATE.year, STATE.month-1, d);
+    rows.push({day:d, date, spend: spendNum, stand, perDay});
+    if(spendNum !== null) runningDsum += spendNum;
+    prevStand = stand;
+  }
+  const lastStand = rows.length ? rows[rows.length-1].stand : E7;
+  // Konec stavu (P33 dle excelu) = P5 - SUM(D8:D38) - (SUM(P8:P32)-R33)
+  const sumAmounts = cfRows.reduce((a,r)=>a+r.amount,0);
+  const P33 = P5 - runningDsum - (sumAmounts - R33);
+  const lastPerDay = rows.length ? rows[rows.length-1].perDay : F7;
+
+  return {E7, F7, P5, daysInMonth: DAYS, rows, cfRows, R33, P33, lastStand, lastPerDay};
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function render(){
+  document.getElementById("periodLabel").textContent = `${MONTH_NAMES[STATE.month-1]} ${STATE.year}`;
+
+  const prijmy = calcPrijmy();
+  const rozpocet = calcRozpocet(prijmy);
+  const cashflow = calcCashflow(prijmy, rozpocet);
+
+  // ---- souhrn ----
+  document.getElementById("sumIncome").textContent = fmt(rozpocet.F13);
+  document.getElementById("sumExpense").textContent = fmt(rozpocet.E17);
+  document.getElementById("sumSavings").textContent = fmt(rozpocet.Q23);
+  document.getElementById("sumZustatek").textContent = fmt(rozpocet.B24);
+
+  // ---- Příjmy ----
+  document.getElementById("p_C3").textContent = fmt(prijmy.C3);
+  document.getElementById("p_C5").textContent = fmt(prijmy.C5);
+  document.getElementById("p_C7").textContent = "− " + fmt(prijmy.C7);
+  document.getElementById("p_D7").textContent = fmt(prijmy.D7);
+  document.getElementById("p_C9").textContent = "− " + fmt(prijmy.C9);
+  document.getElementById("p_D9").textContent = fmt(prijmy.D9);
+  document.getElementById("p_C17").textContent = fmt(prijmy.C17);
+  document.getElementById("p_C19").textContent = fmt(prijmy.C19);
+  document.getElementById("p_D22").textContent = fmt(prijmy.D22);
+  document.getElementById("p_M34").textContent = fmt(prijmy.M34);
+
+  // fixed costs table
+  const fcBody = document.getElementById("fixedCostsBody");
+  fcBody.innerHTML = "";
+  FIXED_COST_LABELS.forEach((label,i)=>{
+    const tr = document.createElement("tr");
+    const tdLabel = document.createElement("td");
+    tdLabel.textContent = label;
+    const tdVal = document.createElement("td");
+    tdVal.className = "num";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.inputMode = "decimal";
+    input.className = "editable";
+    input.value = STATE.fixedCosts[i];
+    input.addEventListener("change", e=>{
+      const v = parseFloat(e.target.value.replace(",","."));
+      STATE.fixedCosts[i] = isNaN(v) ? 0 : v;
+      saveToStorage();
+      render();
+    });
+    tdVal.appendChild(input);
+    tr.appendChild(tdLabel);
+    tr.appendChild(tdVal);
+    fcBody.appendChild(tr);
+  });
+
+  // ---- Rozpočet ----
+  document.getElementById("r_F13").textContent = fmt(rozpocet.F13);
+  document.getElementById("r_F4").textContent = fmt(rozpocet.F4);
+  const extraSum = rozpocet.extra.PC + rozpocet.extra.PM + rozpocet.extra.MP + rozpocet.extra["z května"];
+  document.getElementById("r_extra").textContent = fmt(extraSum);
+  document.getElementById("r_E17").textContent = "− " + fmt(rozpocet.E17);
+  document.getElementById("r_J23").textContent = fmt(rozpocet.J23);
+  document.getElementById("r_M23").textContent = fmt(rozpocet.M23);
+  document.getElementById("r_Q23").textContent = fmt(rozpocet.Q23);
+  document.getElementById("r_B24").textContent = fmt(rozpocet.B24);
+  document.getElementById("r_share").textContent = fmtPct(rozpocet.share);
+  document.getElementById("r_P23").textContent = fmt(rozpocet.P23);
+  document.getElementById("r_Q23b").textContent = fmt(rozpocet.Q23);
+
+  const sBody = document.getElementById("savingsBody");
+  sBody.innerHTML = "";
+  SAVINGS_PLAN.forEach((s,i)=>{
+    const tr = document.createElement("tr");
+    const tdLabel = document.createElement("td"); tdLabel.textContent = s.label;
+    const tdPlan = document.createElement("td"); tdPlan.className="num"; tdPlan.textContent = fmt(s.plan);
+    const tdActual = document.createElement("td"); tdActual.className="num";
+    const input = document.createElement("input");
+    input.type="text"; input.inputMode="decimal"; input.className="editable";
+    input.style.width="80px";
+    input.value = STATE.savingsActual[i];
+    input.addEventListener("change", e=>{
+      const v = parseFloat(e.target.value.replace(",","."));
+      STATE.savingsActual[i] = isNaN(v) ? 0 : v;
+      saveToStorage();
+      render();
+    });
+    tdActual.appendChild(input);
+    tr.appendChild(tdLabel); tr.appendChild(tdPlan); tr.appendChild(tdActual);
+    sBody.appendChild(tr);
+  });
+
+  // ---- Cashflow ----
+  document.getElementById("cf_start").textContent = fmt(cashflow.E7);
+  document.getElementById("cf_end").textContent = fmt(cashflow.P33);
+  document.getElementById("cf_perDay").textContent = fmt(cashflow.lastPerDay);
+  document.getElementById("cf_R33").textContent = fmt(cashflow.R33);
+
+  const dBody = document.getElementById("dailyBody");
+  dBody.innerHTML = "";
+  const todayStr = new Date().toDateString();
+  cashflow.rows.forEach(row=>{
+    const tr = document.createElement("tr");
+    if(row.date.toDateString() === todayStr) tr.classList.add("today-row");
+
+    const tdDay = document.createElement("td"); tdDay.textContent = row.day;
+    const tdDate = document.createElement("td");
+    const weekday = row.date.getDay();
+    const wname = ["Ne","Po","Út","St","Čt","Pá","So"][weekday];
+    tdDate.textContent = `${wname} ${String(row.date.getDate()).padStart(2,"0")}.${String(row.date.getMonth()+1).padStart(2,"0")}.`;
+    if(weekday === 0 || weekday === 6) tdDate.classList.add("weekend");
+
+    const tdSpend = document.createElement("td"); tdSpend.className="num";
+    const input = document.createElement("input");
+    input.type="text"; input.inputMode="decimal"; input.className="editable";
+    input.placeholder="–";
+    input.value = row.spend === null ? "" : row.spend;
+    input.addEventListener("change", e=>{
+      const raw = e.target.value.trim();
+      if(raw === ""){ STATE.dailySpend[row.day-1] = null; }
+      else{
+        const v = parseFloat(raw.replace(",","."));
+        STATE.dailySpend[row.day-1] = isNaN(v) ? null : v;
+      }
+      saveToStorage();
+      render();
+    });
+    tdSpend.appendChild(input);
+
+    const tdStand = document.createElement("td"); tdStand.className="num"; tdStand.textContent = fmt(row.stand);
+    const tdPerDay = document.createElement("td"); tdPerDay.className="num"; tdPerDay.textContent = fmt(row.perDay);
+
+    tr.appendChild(tdDay); tr.appendChild(tdDate); tr.appendChild(tdSpend); tr.appendChild(tdStand); tr.appendChild(tdPerDay);
+    dBody.appendChild(tr);
+  });
+
+  const cfBody = document.getElementById("cfFixedBody");
+  cfBody.innerHTML = "";
+  cashflow.cfRows.forEach((row,i)=>{
+    const tr = document.createElement("tr");
+    const tdLabel = document.createElement("td"); tdLabel.textContent = row.label;
+    const tdAmount = document.createElement("td"); tdAmount.className="num"; tdAmount.textContent = fmt(row.amount);
+    const tdPaid = document.createElement("td"); tdPaid.className="center";
+    const toggle = document.createElement("input");
+    toggle.type="checkbox"; toggle.className="toggle";
+    toggle.checked = row.paid;
+    toggle.addEventListener("change", e=>{
+      STATE.cfPaidFlags[i] = e.target.checked;
+      saveToStorage();
+      render();
+    });
+    tdPaid.appendChild(toggle);
+    const tdR = document.createElement("td"); tdR.className="num"; tdR.textContent = fmt(row.R);
+    tr.appendChild(tdLabel); tr.appendChild(tdAmount); tr.appendChild(tdPaid); tr.appendChild(tdR);
+    cfBody.appendChild(tr);
+  });
+}
+
+/* =========================================================
+   EVENTY — vstup C2
+   ========================================================= */
+const inpC2 = document.getElementById("inpC2");
+inpC2.addEventListener("change", e=>{
+  const v = parseFloat(e.target.value.replace(",","."));
+  STATE.c2 = isNaN(v) ? 0 : v;
+  saveToStorage();
+  render();
+});
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+
+/* =========================================================
+   EXPORT / IMPORT JSON
+   ========================================================= */
+function exportState(state, filename){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("btnExport").addEventListener("click", ()=>{
+  const fname = `prehled_${MONTH_NAMES[STATE.month-1]}_${STATE.year}.json`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  exportState(STATE, fname);
+  showToast("Záloha stažena: " + fname);
+});
+
+document.getElementById("btnImport").addEventListener("click", ()=>{
+  document.getElementById("fileInput").click();
+});
+document.getElementById("fileInput").addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = evt=>{
+    try{
+      const parsed = JSON.parse(evt.target.result);
+      if(typeof parsed.c2 !== "number") throw new Error("invalid");
+      // doplnění chybějících polí výchozími hodnotami pro zpětnou kompatibilitu
+      const def = defaultState(parsed.year || STATE.year, parsed.month || STATE.month);
+      STATE = {...def, ...parsed};
+      saveToStorage();
+      render();
+      showToast("Měsíc načten: " + file.name);
+    }catch(err){
+      showToast("Soubor se nepodařilo načíst — neplatný formát JSON.");
+    }
+    e.target.value = "";
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById("btnReset").addEventListener("click", ()=>{
+  if(confirm("Obnovit šablonu na výchozí hodnoty pro aktuální měsíc? Ztratíte neuložené změny.")){
+    STATE = defaultState(STATE.year, STATE.month);
+    saveToStorage();
+    render();
+    showToast("Šablona obnovena.");
+  }
+});
+
+/* =========================================================
+   MODAL — nový měsíc
+   ========================================================= */
+const modal = document.getElementById("modalNewMonth");
+const nmMonthSelect = document.getElementById("nmMonth");
+MONTH_NAMES.forEach((m,i)=>{
+  const opt = document.createElement("option");
+  opt.value = i+1;
+  opt.textContent = m;
+  nmMonthSelect.appendChild(opt);
+});
+
+document.getElementById("btnNewMonth").addEventListener("click", ()=>{
+  // navrhne příští měsíc po aktuálním
+  let nextMonth = STATE.month + 1;
+  let nextYear = STATE.year;
+  if(nextMonth > 12){ nextMonth = 1; nextYear += 1; }
+  document.getElementById("nmYear").value = nextYear;
+  nmMonthSelect.value = nextMonth;
+  modal.classList.add("show");
+});
+document.getElementById("nmCancel").addEventListener("click", ()=>modal.classList.remove("show"));
+modal.addEventListener("click", e=>{ if(e.target === modal) modal.classList.remove("show"); });
+
+document.getElementById("nmConfirm").addEventListener("click", ()=>{
+  const year = parseInt(document.getElementById("nmYear").value,10) || STATE.year;
+  const month = parseInt(nmMonthSelect.value,10);
+  const fresh = defaultState(year, month);
+  // pevné platby a plán úspor přeneseme jako neměnnou šablonu z aktuálního stavu
+  fresh.fixedCosts = STATE.fixedCosts.slice();
+  fresh.cfPaidFlags = STATE.cfPaidFlags.slice();
+  fresh.savingsActual = STATE.savingsActual.slice();
+  fresh.rozpocetExtra = {...STATE.rozpocetExtra};
+  fresh.c2 = STATE.c2; // necháme poslední hodnotu pro pohodlí, lze hned přepsat
+
+  const fname = `prehled_${MONTH_NAMES[month-1]}_${year}.json`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  exportState(fresh, fname);
+  modal.classList.remove("show");
+  showToast(`Nový měsíc vytvořen a stažen: ${fname}`);
+
+  if(confirm(`Přepnout aplikaci na ${MONTH_NAMES[month-1]} ${year} hned teď?`)){
+    STATE = fresh;
+    saveToStorage();
+    render();
+  }
+});
+
+/* =========================================================
+   INIT
+   ========================================================= */
+render();
+</script>
+</body>
+</html>
